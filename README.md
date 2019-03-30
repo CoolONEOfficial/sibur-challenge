@@ -1,5 +1,7 @@
 # sibur-challenge
 
+[![Build Status](https://travis-ci.org/CoolONEOfficial/sibur-challenge.svg?branch=master)](https://travis-ci.org/CoolONEOfficial/sibur-challenge)
+
 ## Project setup
 ```
 npm install
