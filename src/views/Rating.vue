@@ -1,6 +1,6 @@
 <template>
     <v-container class="rating justify-center">
-        <h1 class="text-xs-center mt-5">Leader board</h1>
+        <h1 class="text-xs-center mt-5">Leaderboard</h1>
         <v-layout row class="rounded dark my-5 pa-3" id="leader-list">
             <img src="../assets/icon_location.png" width="70px" height="70px" alt="" class="mr-3">
             <div class="rounded light px-4" style="width: 100%;">
@@ -239,6 +239,17 @@
                     rating.set(uid, getPoints(uid) - points);
                 };
 
+              //  let targets = new Map();
+
+                let advantages = new Map();
+
+                // let addTarget = function (uid, icon, text) {
+                //     targets.set(uid, [icon, text]);
+                // };
+                let addAdvantage = function (uid, icon, text) {
+                    advantages.set(uid, [icon, text]);
+                };
+
                 Promise.all([
                     db.ref('users').orderByChild('branch').equalTo(vm.branch.name)
                         .once(
@@ -246,8 +257,6 @@
                         ).then(
                         function (snapshot) {
                             let users = snapshot.val();
-
-                            //console.log(users);
 
                             for (let key in users) {
                                 let val = users[key];
@@ -307,6 +316,7 @@
                                 let uid = val.uid;
                                 if (uid != null) {
                                     addPoints(uid, 20);
+                                    addAdvantage(uid, "advantage", "У вас есть " + val.relationDegree.toLowerCase());
 
                                     // // Bithday
                                     // let bithdayStr = val.bithday;
@@ -334,6 +344,8 @@
                                 if (uid != null) {
                                     addPoints(uid, 30);
 
+                                    addAdvantage(uid, 'advantage', "Вы взяли приемного ребенка");
+
                                     // // Bithday
                                     // let bithdayStr = val.bithday;
                                     // if(bithdayStr != null) {
@@ -359,6 +371,9 @@
                                 let uid = val.uid;
                                 if (uid != null) {
                                     addPoints(uid, 15);
+
+                                    addAdvantage(uid, "advantage", `Вы заработали "${val.name}"`);
+
 
                                     // ...
 
@@ -411,6 +426,8 @@
                                 if (uid != null) {
                                     addPoints(uid, 15);
 
+                                    addAdvantage(uid, "advantage", "Вы получили повышение!");
+
                                     // ...
                                 } else console.log("uid not found!");
                             }
@@ -424,6 +441,19 @@
                         console.log("ALL done :tada:", rating);
 
                         let promises = [];
+
+                        advantages.forEach(
+                            (advantage, uid) => {
+                                console.log("uid: ", uid);
+                                console.log("adv", advantage);
+                                promises.push(db.ref(
+                                    'advantages/' + uid
+                                ).set({
+                                    icon: advantage[0],
+                                    text: advantage[1],
+                                }));
+                            }
+                        );
 
                         rating.forEach(
                             (points, uid) => {
