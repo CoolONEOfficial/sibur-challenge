@@ -12,11 +12,11 @@
             <v-container
                     style="height: 400px"
                     class="scroll-y px-3 rounded light pt-3">
-                <div class="px-3 pb-3" v-for="user in list" :key="user">
+                <div class="px-3 pb-3" v-for="(user, index) in list" :key="index">
                     <v-layout row>
-                        <h3>{{ user.name }}</h3>
+                        <h3>{{ index + 1 + ') ' + user.uid }}</h3>
                         <v-spacer/>
-                        <h2>{{ user.uid }}</h2>
+                        <h2>{{ user.points }}</h2>
                     </v-layout>
                 </div>
             </v-container>
@@ -68,7 +68,35 @@
                 ],
             };
         },
+        watch: {
+            branch(val) {
+                if (val != null)
+                    this.reload();
+            }
+        },
         methods: {
+            reload() {
+                let vm = this;
+
+                this.list.splice(0, this.list.length);
+
+                db.ref('rating/' + this.branch).orderByChild('points').once(
+                    'value'
+                ).then(
+                    function (snapshot) {
+                        let rating = snapshot.val();
+
+                        for (let uid in rating) {
+                            let points = rating[uid].points;
+
+                            vm.list.push({
+                                uid: uid,
+                                points: points,
+                            });
+                        }
+                    }
+                );
+            },
             refresh() {
                 let vm = this;
 
@@ -265,24 +293,30 @@
                             console.log("promotions done", rating);
                         }
                     ),
+                    db.ref('rating/' + vm.branch).remove(),
                 ]).then(
                     function () {
                         console.log("ALL done :tada:", rating);
 
                         let promises = [];
 
-                        for(let uid in rating) {
-                            console.log("uid: ", uid, "points", rating[uid]);
-                            promises.push(db.ref(
-                                'rating/' + uid
-                            ).set({
-                                points: rating[uid],
-                            }));
-                        }
+                        rating.forEach(
+                            (points, uid) => {
+                                console.log("uid: ", uid);
+                                console.log("points", points);
+                                promises.push(db.ref(
+                                    'rating/' + vm.branch + '/' + uid
+                                ).set({
+                                    points: points,
+                                }));
+                            }
+                        );
 
                         Promise.all(promises).then(
                             function () {
                                 console.log('All pushed!');
+
+                                vm.reload();
                             }
                         );
                     }

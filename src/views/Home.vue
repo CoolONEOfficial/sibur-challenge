@@ -62,9 +62,6 @@
                 password: '',
             }
         },
-        created () {
-            console.log('created', this);
-        },
         methods: {
             login: function () {
                 let vm = this;
