@@ -1,29 +1,65 @@
 <template>
-  <div id="app">
-    <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
-    </div>
-    <router-view/>
-  </div>
+  <v-app>
+    <Header/>
+    <v-content>
+      <router-view/>
+    </v-content>
+  </v-app>
 </template>
 
-<style lang="scss">
-#app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-}
-#nav {
-  padding: 30px;
-  a {
-    font-weight: bold;
-    color: #2c3e50;
-    &.router-link-exact-active {
-      color: #42b983;
+<script>
+import Header from "./components/Header";
+
+export default {
+  name: 'App',
+  components: {
+    Header,
+  },
+  data () {
+    return {
+      //
     }
   }
 }
+</script>
+
+<style lang="scss">
+  @font-face {
+    font-family: 'Roboto Light';
+    src: url('./assets/fonts/Roboto-Light.woff2') format('woff2'),
+    url('./assets/fonts/Roboto-Light.woff') format('woff');
+    font-weight: 100;
+    font-style: normal;
+  }
+
+  #app {
+    background: #20626A;
+  }
+
+  .rounded {
+    border-radius: 40px;
+  }
+
+  h1 {
+    font-family: 'Roboto Light', arial, sans-serif;
+    font-weight: 100;
+    font-size: 40pt;
+    color: #C9E8EA;
+  }
+
+  .roboto {
+    font-family: 'Roboto Light', arial, sans-serif;
+    font-weight: 100;
+    color: #C9E8EA;
+  }
+
+  .light {
+    background: #C4C4C4;
+    opacity: 0.6;
+  }
+
+  .dark {
+    background: #1D3538;
+    opacity: 0.5;
+  }
 </style>

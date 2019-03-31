@@ -1,6 +1,24 @@
 {
   "rules": {
     ".read": "auth != null",
-    ".write": "auth != null"
+    ".write": "auth != null",
+    "users": {
+      ".indexOn": ["branch"]
+    },
+    "chilren": {
+      ".indexOn": ["branch"]
+    },
+    "adaptedChilren": {
+      ".indexOn": ["branch"]
+    },
+    "achievements": {
+      ".indexOn": ["branch"]
+    },
+    "vouchers": {
+      ".indexOn": ["branch"]
+    },
+    "promotions": {
+      ".indexOn": ["branch"]
+    }
   }
 }
