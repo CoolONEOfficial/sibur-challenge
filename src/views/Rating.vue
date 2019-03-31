@@ -3,28 +3,70 @@
         <h1 class="text-xs-center mt-5">Leader board</h1>
         <v-layout row class="rounded dark my-5 pa-3" id="leader-list">
             <img src="../assets/icon_location.png" width="70px" height="70px" alt="" class="mr-3">
-            <div class="rounded light px-3" style="width: 100%;">
-                <v-select :items="branches" v-model="branch" label="Филиал"></v-select>
+            <div class="rounded light px-4" style="width: 100%;">
+                <v-select :items="branches.map(value => value.name)" @input="branchSelect($event)"
+                          label="Филиал"></v-select>
             </div>
         </v-layout>
-        <div class="rounded dark pa-3">
-            <h3 class="roboto text-xs-center pb-3" style="font-size: 30pt;">Список</h3>
+        <div class="rounded dark pa-3" v-show="branch != null">
             <v-container
                     style="height: 400px"
-                    class="scroll-y px-3 rounded light pt-3">
-                <div class="px-3 pb-3" v-for="(user, index) in list" :key="index">
+                    class="scroll-y px-3 rounded light pt-4">
+                <div v-if="!list.empty || !loading">
+                    <div class="px-3 pb-3"
+                         v-for="(user, index) in list.slice(0, branch != null ? branch.countBeforeSeven : 0)"
+                         :key="index">
+                        <v-layout row>
+                            <h2 style="color: black;">{{ index + 1 + ') ' + user.uid }}</h2>
+                            <v-spacer/>
+                            <div v-if="branch.countBeforeSeven <= 0 ? false : user.points === list[branch.countBeforeSeven + 1].points"
+                                 class="rounded mr-3 pa-3" style="background: yellow;"></div>
+                            <h2 style="color: black;">{{ user.points }}</h2>
+                        </v-layout>
+                    </div>
+                </div>
+                <div v-else>
+                    <v-layout align-center justify-center fill-height>
+                        <v-progress-circular
+                                size="100"
+                                :width="3"
+                                color="white"
+                                indeterminate
+                        ></v-progress-circular>
+                    </v-layout>
+                </div>
+            </v-container>
+            <div v-if="branch != null && branch.countBeforeSeven >= 0">
+                <div class="rounded light pa-2 my-2"></div>
+            </div>
+            <v-container v-if="branch != null && branch.countBeforeSeven >= 0"
+                         style="height: 400px"
+                         class="scroll-y px-3 rounded light pt-4">
+                <div class="px-3 pb-3" v-for="(user, index) in list.slice(branch != null ? branch.countBeforeSeven : 0)"
+                     :key="index">
                     <v-layout row>
-                        <h3>{{ index + 1 + ') ' + user.uid }}</h3>
+                        <h2 style="color: black;">{{ (branch != null ? branch.countBeforeSeven : 0) + index + 1 + ') ' +
+                            user.uid }}</h2>
                         <v-spacer/>
-                        <h2>{{ user.points }}</h2>
+                        <div v-if="branch.countBeforeSeven <= 0 ? false : user.points === list[branch.countBeforeSeven - 1].points"
+                             class="rounded mr-3 pa-3" style="background: yellow;"></div>
+                        <h2 style="color: black;">{{ user.points }}</h2>
                     </v-layout>
                 </div>
             </v-container>
         </div>
         <v-layout>
             <v-spacer/>
-            <div class="rounded px-4 py-3 mt-5 dark" style="cursor: pointer;" @click="refresh">
-                <h1>Refresh</h1>
+            <div v-show="branch != null" class="rounded px-4 py-3 mt-5 dark" style="cursor: pointer;" @click="refresh">
+                <h1 v-if="!loading">Refresh</h1>
+                <v-progress-circular
+                        v-else
+                        size="100"
+                        :width="3"
+                        color="white"
+                        indeterminate
+                ></v-progress-circular>
+
             </div>
             <v-spacer/>
         </v-layout>
@@ -40,64 +82,147 @@
             return {
                 branch: null,
                 list: [],
+                loading: false,
                 branches: [
-                    'Альдераан',
-                    'Ба́мблби',
-                    'Гундабад',
-                    'Изенгард',
-                    'Империя сов Илопса',
-                    'Кашкай',
-                    'Лесные эдьфы',
-                    'Лихолесье',
-                    'Лориэн',
-                    'Мглистые горы',
-                    'Минас-Тирит',
-                    'Мория',
-                    'Одинокая гора',
-                    'Озерный город',
-                    'Площадь Гриммо',
-                    'Ривенделл',
-                    'Рохан',
-                    'Сен-Мартен',
-                    'Сингапур',
-                    'Синие горы',
-                    'Суллуст ',
-                    'Хельмова Падь',
-                    'Хоббитон',
-                    'Шир',
+                    {
+                        name: "Альдераан",
+                        countBeforeSeven: -1,
+                    },
+                    {
+                        name: 'Ба́мблби',
+                        countBeforeSeven: -1,
+                    },
+                    {
+                        name: 'Гундабад',
+                        countBeforeSeven: -1,
+                    },
+                    {
+                        name: 'Изенгард',
+                        countBeforeSeven: -1,
+                    },
+                    {
+                        name: 'Империя сов Илопса',
+                        countBeforeSeven: -1,
+                    },
+                    {
+                        name: 'Кашкай',
+                        countBeforeSeven: -1,
+                    },
+                    {
+                        name: 'Лесные эдьфы',
+                        countBeforeSeven: -1,
+                    },
+                    {
+                        name: 'Лихолесье',
+                        countBeforeSeven: -1,
+                    },
+                    {
+                        name: 'Лориэн',
+                        countBeforeSeven: -1,
+                    },
+                    {
+                        name: 'Мглистые горы',
+                        countBeforeSeven: 97,
+                    },
+                    {
+                        name: 'Минас-Тирит',
+                        countBeforeSeven: 27,
+                    },
+                    {
+                        name: 'Мория',
+                        countBeforeSeven: 164,
+                    },
+                    {
+                        name: 'Одинокая гора',
+                        countBeforeSeven: 140,
+                    },
+                    {
+                        name: 'Озерный город',
+                        countBeforeSeven: 309,
+                    },
+                    {
+                        name: 'Площадь Гриммо',
+                        countBeforeSeven: -1,
+                    },
+                    {
+                        name: 'Ривенделл',
+                        countBeforeSeven: 19,
+                    },
+                    {
+                        name: 'Рохан',
+                        countBeforeSeven: -1,
+                    },
+                    {
+                        name: 'Сен-Мартен',
+                        countBeforeSeven: 17,
+                    },
+                    {
+                        name: 'Сингапур',
+                        countBeforeSeven: -1,
+                    },
+                    {
+                        name: 'Синие горы',
+                        countBeforeSeven: 447,
+                    },
+                    {
+                        name: 'Суллуст ',
+                        countBeforeSeven: -1,
+                    },
+                    {
+                        name: 'Хельмова Падь',
+                        countBeforeSeven: -1,
+                    },
+                    {
+                        name: 'Хоббитон',
+                        countBeforeSeven: -1,
+                    },
+                    {
+                        name: 'Шир',
+                        countBeforeSeven: -1,
+                    },
                 ],
-            };
-        },
-        watch: {
-            branch(val) {
-                if (val != null)
-                    this.reload();
             }
+                ;
         },
         methods: {
+            branchSelect(br) {
+                this.branch = this.branches[this.branches.findIndex(value => value.name === br)];
+                console.log("loggg", this.branch);
+                this.reload();
+            },
             reload() {
                 let vm = this;
 
                 this.list.splice(0, this.list.length);
 
-                db.ref('rating/' + this.branch).orderByChild('points').once(
+                db.ref('rating/' + this.branch.name).orderByChild('points').once(
                     'value'
                 ).then(
                     function (snapshot) {
                         let rating = snapshot.val();
 
-                        for (let uid in rating) {
-                            let points = rating[uid].points;
+                        if (rating == null || rating.empty) vm.refresh();
+                        else
+                            for (let uid in rating) {
+                                let points = rating[uid].points;
 
-                            vm.list.push({
-                                uid: uid,
-                                points: points,
-                            });
-                        }
+                                vm.list.push({
+                                    uid: uid,
+                                    points: points,
+                                });
+                            }
+
+                        vm.list.sort(
+                            function (a, b) {
+                                return b.points - a.points;
+                            }
+                        );
                     }
                 );
             },
             refresh() {
+                this.loading = true;
+
                 let vm = this;
 
                 let rating = new Map();
@@ -115,7 +240,7 @@
                 };
 
                 Promise.all([
-                    db.ref('users').orderByChild('branch').equalTo(vm.branch)
+                    db.ref('users').orderByChild('branch').equalTo(vm.branch.name)
                         .once(
                             'value'
                         ).then(
@@ -170,7 +295,7 @@
                             console.log("users done", rating);
                         }
                     ),
-                    db.ref('chilren').orderByChild('branch').equalTo(vm.branch)
+                    db.ref('chilren').orderByChild('branch').equalTo(vm.branch.name)
                         .once(
                             'value'
                         ).then(
@@ -196,7 +321,7 @@
                             console.log("children done", rating);
                         }
                     ),
-                    db.ref('adoptedChilren').orderByChild('branch').equalTo(vm.branch)
+                    db.ref('adoptedChilren').orderByChild('branch').equalTo(vm.branch.name)
                         .once(
                             'value'
                         ).then(
@@ -222,7 +347,7 @@
                             console.log("adapted children done", rating);
                         }
                     ),
-                    db.ref('achievements').orderByChild('branch').equalTo(vm.branch)
+                    db.ref('achievements').orderByChild('branch').equalTo(vm.branch.name)
                         .once(
                             'value'
                         ).then(
@@ -243,7 +368,7 @@
                             console.log("achievements done", rating);
                         }
                     ),
-                    db.ref('vouchers').orderByChild('branch').equalTo(vm.branch)
+                    db.ref('vouchers').orderByChild('branch').equalTo(vm.branch.name)
                         .once(
                             'value'
                         ).then(
@@ -273,7 +398,7 @@
                             console.log("vouchers done", rating);
                         }
                     ),
-                    db.ref('promotions').orderByChild('branch').equalTo(vm.branch)
+                    db.ref('promotions').orderByChild('branch').equalTo(vm.branch.name)
                         .once(
                             'value'
                         ).then(
@@ -293,7 +418,7 @@
                             console.log("promotions done", rating);
                         }
                     ),
-                    db.ref('rating/' + vm.branch).remove(),
+                    db.ref('rating/' + vm.branch.name).remove(),
                 ]).then(
                     function () {
                         console.log("ALL done :tada:", rating);
@@ -305,7 +430,7 @@
                                 console.log("uid: ", uid);
                                 console.log("points", points);
                                 promises.push(db.ref(
-                                    'rating/' + vm.branch + '/' + uid
+                                    'rating/' + vm.branch.name + '/' + uid
                                 ).set({
                                     points: points,
                                 }));
@@ -317,6 +442,8 @@
                                 console.log('All pushed!');
 
                                 vm.reload();
+
+                                vm.loading = false;
                             }
                         );
                     }

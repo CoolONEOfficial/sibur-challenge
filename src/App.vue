@@ -47,6 +47,16 @@ export default {
     color: #C9E8EA;
   }
 
+  h2 {
+    font-family: 'Roboto Light', arial, sans-serif;
+    font-weight: 100;
+  }
+
+  h3 {
+    font-family: 'Roboto Light', arial, sans-serif;
+    font-weight: 100;
+  }
+
   .roboto {
     font-family: 'Roboto Light', arial, sans-serif;
     font-weight: 100;
